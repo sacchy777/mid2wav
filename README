@@ -1,0 +1,78 @@
+[What's this]
+
+Yet another implementation of MIDI to wave converter.
+
+Executable binaries:
+
+- mid2wav
+    midi to wave converter
+
+- wtssynth_test
+    test of synth library
+
+- mid2wav.dll
+    MS Windows dll version of mid2wav
+
+- mid2wavdll_test
+    test of dll 
+
+To complie these, just type make.
+Use mingw gcc for DLL compile to make it independent of cygwin dll.
+
+
+
+[Files]
+
+audiobuf.c
+  Audio buffer library
+
+nrsynth.c
+  Noise rhythm synthesizer
+
+wtssynth_test.c
+  Test of wtssynth and nrsynth
+
+midievent.c
+  Midi event structure
+
+sdelay.c
+  Schroeder's reverb effect
+
+mid2wav.c
+  MIDI to wave converter executalble
+
+midfile.c
+  MIDI file library
+
+soundmodule.c
+  Sound module library
+
+xor128.c
+  Pseudo randome generator
+
+mid2wavdll.c
+  DLL implementation of mid2wav
+
+mid2wavdll_test.c
+  Test of DLL implementation of mid2wav
+
+midifile_test.c
+  Test of midifile
+
+wtssynth.c
+  Wave table synth
+
+misc.c
+  Miscellaneous functions
+
+freq_table.rb
+  frequency table generator. This generates .c/.h
+
+mid2wav.rb
+  Example of DLL usage in ruby
+
+wtssynth_def.rb
+  wave table generator. This generates .c
+
+
+

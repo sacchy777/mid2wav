@@ -1,0 +1,14 @@
+*~
+*.exe
+*.wav
+*.mp3
+*.mid
+*.MID
+*.WAV
+*.zip
+*.orig
+freq_table.c
+wtssynth_def.c
+freq_table.h
+*.stackdump
+visualstudio
