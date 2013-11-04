@@ -1,0 +1,21 @@
+-- V0.1 
+
+changed the unit of attack, decay, and release time in wtsconfig_t
+  from ticks to second
+
+modified the volume balance of default tone params
+  increased volume of tirangle tones.
+
+modifiled mid2wav.c to exit properly.
+  deleted all undeleted pointers.	 
+
+added ctplay.c and related makefiles
+
+ctplay is an implemetation of a command line midi file player using mid2wav.
+It requires SDL to compile.
+
+
+
+-- V0.0
+
+first release

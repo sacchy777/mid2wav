@@ -1,0 +1,22 @@
+PROGRAM = ctplay
+OBJS	= ctplay.o soundmodule.o midifile.o midievent.o freq_table.o wtssynth_def.o wtssynth.o nrsynth.o xor128.o audiobuf.o misc.o sdelay.o
+CC	= gcc
+
+CFLAGS	= -DUSE_GUI -g -Wall -O2 -DLINUX -I/usr/include/SDL2 -I/usr/include/SDL `sdl2-config --cflags`
+#CFLAGS	= -g -Wall -O2 -DLINUX `sdl2-config --cflags`
+LIBS	= `sdl2-config --libs` -lSDL2_ttf -lXi # fails without -lXi if you are using SDL2-2.0.1 on Linux
+
+.SUFFIXIES:	.c .o
+
+all:	$(PROGRAM)
+
+$(PROGRAM)	:$(OBJS)
+	$(CC) $(CFLAGS) -o $(PROGRAM) $^ $(LIBS)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+.PHONY:	clean
+clean:
+	$(RM) $(PROGRAM) $(OBJS)
+

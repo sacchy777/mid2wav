@@ -1,0 +1,25 @@
+PROGRAM = ctplay
+OBJS	= ctplay.o soundmodule.o midifile.o midievent.o freq_table.o wtssynth_def.o wtssynth.o nrsynth.o xor128.o audiobuf.o misc.o sdelay.o
+CC	= gcc
+
+CFLAGS	= -DUSE_GUI -g -Wall -O2 -DWINDOWS `sdl2-config --cflags`
+LIBS	= `sdl2-config --libs` -lSDL2_ttf
+#LIBS	= `sdl2-config --static-libs` -lSDL2_ttf
+#LIBS	= -L/usr/lib -lmingw32 -lSDL2main -lSDL2 -mwindows -lm -ldinput8 -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc -lSDL2_ttf
+
+.SUFFIXIES:	.c .o
+
+all:	$(PROGRAM)
+
+$(PROGRAM)	:$(OBJS)
+	$(CC) $(CFLAGS) -o $(PROGRAM) $^ $(LIBS)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+.PHONY:	clean
+clean:
+	$(RM) $(PROGRAM) $(OBJS)
+
+#test_cave.o:cave.h
+
