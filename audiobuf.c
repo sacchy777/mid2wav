@@ -40,7 +40,7 @@ audiobuf_t *audiobuf_create(int size, int n_channels, int sampling_rate, int qbi
   audiobuf_t *a;
   a = (audiobuf_t *)malloc(sizeof(audiobuf_t));
   if(a == NULL) goto error;
-  memset(a, 0, sizeof(a));
+  memset(a, 0, sizeof(audiobuf_t));
 
   a->data = (float**)malloc(sizeof(float*) * n_channels);
   if(a->data == NULL) goto error;

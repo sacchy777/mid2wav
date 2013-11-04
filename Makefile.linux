@@ -1,3 +1,9 @@
+#
+#
+#         ctplay Makefile for Linux
+#
+#
+
 PROGRAM = ctplay
 OBJS	= ctplay.o soundmodule.o midifile.o midievent.o freq_table.o wtssynth_def.o wtssynth.o nrsynth.o xor128.o audiobuf.o misc.o sdelay.o
 CC	= gcc

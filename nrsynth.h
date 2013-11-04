@@ -72,6 +72,7 @@ typedef struct {
   unsigned int release_time;
   int pitchmode; /* 0 highest, 1 middle, 2 lowest pitch */
   float rnd;
+  int key; /* is not used for playing but for display*/
 } nrsynth_inst_t;
 
 /*---------------------------------------------------
@@ -127,6 +128,7 @@ void nrsynth_render(nrsynth_t *n, audiobuf_t *a, int start, int size);
 void nrsynth_midi(nrsynth_t *n, midievent_t *e);
 
 
+int nrsynth_get_current_key(nrsynth_t *n, int index);
 
 
 

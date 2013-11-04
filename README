@@ -19,6 +19,22 @@ Executable binaries:
 To complie these, just type make.
 Use mingw gcc for DLL compile to make it independent of cygwin dll.
 
+- ctplay
+
+A graphical midi player.
+SDL2 and SDL2_ttf is required to compile.
+http://www.libsdl.org/
+
+for Windows(mingw):
+make -f Makefile.windows
+
+for Linux
+make -f Makefile.linux
+
+
+
+
+
 
 
 [Files]

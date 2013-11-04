@@ -138,5 +138,11 @@ int main(int argc, char *argv[]){
   }
   putchar('\n');
   printf("Successfully converted to %s.\n", outfilename);
+
+  sdelay_destroy(m.d);
+  soundmodule_destroy(m.s);
+  audiobuf_destroy(m.a);
+  midifile_destroy(m.mf, 1);
+
   return EXIT_SUCCESS;
 }

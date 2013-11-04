@@ -108,7 +108,9 @@ void soundmodule_dispatch_midi(soundmodule_t *s, midifile_t *mf){
 void soundmodule_dispatch_wave(soundmodule_t *s, audiobuf_t *a, int current_bufpos, int length){
   int i;
   for(i = 0; i < SOUNDMODULE_CHAMBER_MAX; i ++){
-    
+
+    if(s->chambers[i].is_muted) continue;
+
     /* dispatch */
     switch(s->chambers[i].type){
 
@@ -161,5 +163,107 @@ void soundmodule_render(soundmodule_t *s, audiobuf_t *a, midifile_t *mf){
     /* increment current position of audiobuf */
     current_bufpos += samples_to_render;
   }
+}
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+int soundmodule_is_muted(soundmodule_t *s, int channel){
+  return s->chambers[channel].is_muted == 1;
+}
+
+void soundmodule_mute(soundmodule_t *s, int channel){
+  s->chambers[channel].is_muted = 1;
+}
+
+void soundmodule_unmute(soundmodule_t *s, int channel){
+  void *synth;
+  s->chambers[channel].is_muted = 0;
+  synth = s->chambers[channel].synth;
+  switch(s->chambers[channel].type){
+  case SOUNDMODULE_CHAMBER_TYPE_WTS:
+    return wtssynth_all_note_off(synth);
+  case SOUNDMODULE_CHAMBER_TYPE_NR:
+    return ;
+  default:
+    return ;
+  } /* end of switch */
+}
+
+void soundmodule_solo(soundmodule_t *s, int channel){
+  int i;
+  for(i = 0; i < SOUNDMODULE_CHAMBER_MAX; i ++){
+    s->chambers[i].is_muted = i == channel ? 0 : 1;
+  }
+}
+
+void soundmodule_clear_mute(soundmodule_t *s){
+  int i;
+  for(i = 0; i < SOUNDMODULE_CHAMBER_MAX; i ++){
+    s->chambers[i].is_muted = 0;
+  }
+}
+
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+void soundmodule_midi_key(soundmodule_t *s, int midi_key){
+  int i;
+  void *synth;
+  for(i = 0; i < SOUNDMODULE_CHAMBER_MAX; i ++){
+    synth = s->chambers[i].synth;
+    switch(s->chambers[i].type){
+    case SOUNDMODULE_CHAMBER_TYPE_WTS:
+      wtssynth_midi_key(synth, midi_key);
+      break;
+    case SOUNDMODULE_CHAMBER_TYPE_NR:
+      break;
+    default:
+      ;
+    } /* end of switch */
+
+  }
+}
+
+
+
+int soundmodule_get_current_key(soundmodule_t *s, int channel, int voice_index){
+  void *synth;
+  synth = s->chambers[channel].synth;
+  switch(s->chambers[channel].type){
+  case SOUNDMODULE_CHAMBER_TYPE_WTS:
+    return wtssynth_get_current_key(synth, voice_index);
+  case SOUNDMODULE_CHAMBER_TYPE_NR:
+    return nrsynth_get_current_key(synth, voice_index);
+  default:
+    return -1;
+  } /* end of switch */
+}
+
+int soundmodule_is_key_offing(soundmodule_t *s, int channel, int voice_index){
+  void *synth;
+  synth = s->chambers[channel].synth;
+  switch(s->chambers[channel].type){
+  case SOUNDMODULE_CHAMBER_TYPE_WTS:
+    return wtssynth_is_key_offing(synth, voice_index);
+  case SOUNDMODULE_CHAMBER_TYPE_NR:
+    return 0;
+  default:
+    return 0;
+    ;
+  } /* end of switch */
+}
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+int soundmodule_get_program(soundmodule_t *s, int channel){
+  void *synth;
+  synth = s->chambers[channel].synth;
+  switch(s->chambers[channel].type){
+  case SOUNDMODULE_CHAMBER_TYPE_WTS:
+    return wtssynth_get_program(synth);
+  case SOUNDMODULE_CHAMBER_TYPE_NR:
+    return 0;
+  default:
+    return 0;
+  } /* end of switch */
 }
 

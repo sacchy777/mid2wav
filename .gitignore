@@ -7,8 +7,9 @@
 *.WAV
 *.zip
 *.orig
-freq_table.c
-wtssynth_def.c
-freq_table.h
+*.png
 *.stackdump
+*.a
+*.o
+*.dll
 visualstudio

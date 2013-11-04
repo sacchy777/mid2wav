@@ -47,6 +47,7 @@ enum{
 typedef struct {
   int type;
   void *synth;
+  int is_muted;
 } soundmodule_chamber_t;
 
 #define SOUNDMODULE_CHAMBER_MAX 16
@@ -68,6 +69,23 @@ void soundmodule_destroy(soundmodule_t *s);
 /*---------------------------------------------------
  *---------------------------------------------------*/
 void soundmodule_render(soundmodule_t *s, audiobuf_t *a, midifile_t *mf);
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+void soundmodule_mute(soundmodule_t *s, int channel);
+int soundmodule_is_muted(soundmodule_t *s, int channel);
+void soundmodule_unmute(soundmodule_t *s, int channel);
+void soundmodule_solo(soundmodule_t *s, int channel);
+void soundmodule_clear_mute(soundmodule_t *s);
+
+
+
+void soundmodule_midi_key(soundmodule_t *s, int midi_key);
+
+int soundmodule_get_current_key(soundmodule_t *s, int channel, int voice_index);
+int soundmodule_is_key_offing(soundmodule_t *s, int channel, int voice_index);
+int soundmodule_get_program(soundmodule_t *s, int channel);
+
 
 
 #ifdef __cplusplus

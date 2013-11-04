@@ -37,6 +37,19 @@ extern const wtstone_t wtstone_wave_presets[WTSTONE_NUM_PRESETS];
 
 /*---------------------------------------------------
  *---------------------------------------------------*/
+static void wtsconfig_precalc(wtsconfig_t *c){
+  int i;
+  for(i = 0 ; i < WTSTONE_NUM_PRESETS; i ++){
+    wtstone_t *t = &c->presets[i];
+    t->attack_time_int = t->attack_time * c->sampling_rate;
+    t->decay_time_int = t->decay_time * c->sampling_rate;
+    t->release_time_int = t->release_time * c->sampling_rate;
+    t->attack_decay_time_int = t->attack_time_int + t->decay_time_int;
+  }
+}
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
 wtsconfig_t *wtsconfig_create(){
   int i;
   wtsconfig_t *c;
@@ -44,10 +57,13 @@ wtsconfig_t *wtsconfig_create(){
   wtsconfig_init(c);
   //  c->presets = (wtstone_t *)malloc(sizeof(wtstone_t)* NUM_PRESETS);
   memcpy(c->presets, wtstone_wave_presets, sizeof(wtstone_t) * WTSTONE_NUM_PRESETS);
+  wtsconfig_precalc(c);
+  /*
   for(i = 0 ; i < WTSTONE_NUM_PRESETS; i ++){
     wtstone_t *t = &c->presets[i];
     t->attack_decay_time = t->attack_time + t->decay_time;
   }
+  */
   for(i = 0; i < 128; i ++){
     c->tonemap[i] = i / 8;
   }
@@ -90,7 +106,7 @@ static void wtsconfig_update_volume(wtsconfig_t *c){
 /*---------------------------------------------------
  *---------------------------------------------------*/
 void wtsconfig_init(wtsconfig_t *c){
-  memset(c, 0, sizeof(c));
+  memset(c, 0, sizeof(wtsconfig_t));
   c->sampling_rate = WTSCONFIG_SAMPLING_RATE_DEFAULT;
   c->panpot = WTSCONFIG_PANPOT_DEFAULT;
   c->volume = WTSCONFIG_VOLUME_DEFAULT;
@@ -105,16 +121,21 @@ void wtsconfig_init(wtsconfig_t *c){
  *---------------------------------------------------*/
 void wtstone_init(wtstone_t *t){
   int i;
-  memset(t, 0, sizeof(t));
+  memset(t, 0, sizeof(wtstone_t));
   for(i = 0; i < WTSTONE_WAVE_SIZE; i ++){
     t->wave[i] = i < WTSTONE_WAVE_SIZE/2 ? 1.0 : -1.0;
   }
-  t->attack_time = WTSADSR_ATTACK_TIME_DEFAULT;
+
+  t->attack_time = 0.0;
+  t->decay_time = 0.0;
+  t->release_time = 0.0;
+
+  t->attack_time_int = WTSADSR_ATTACK_TIME_DEFAULT;
   t->total_level = WTSADSR_TOTAL_LEVEL_DEFAULT;
-  t->decay_time = WTSADSR_DECAY_TIME_DEFAULT;
+  t->decay_time_int = WTSADSR_DECAY_TIME_DEFAULT;
   t->sustain_level = WTSADSR_SUSTAIN_LEVEL_DEFAULT;
-  t->release_time = WTSADSR_RELEASE_TIME_DEFAULT;
-  t->attack_decay_time = t->attack_time + t->decay_time;
+  t->release_time_int = WTSADSR_RELEASE_TIME_DEFAULT;
+  t->attack_decay_time_int = t->attack_time_int + t->decay_time_int;
 }
 
 /*---------------------------------------------------
@@ -125,7 +146,7 @@ void wtstone_set_adsr(wtstone_t *t, float tl, float at, float dt, float sl, floa
   t->decay_time = sampling_rate * dt;
   t->sustain_level = sl;
   t->release_time = sampling_rate * rt;
-  t->attack_decay_time = t->attack_time + t->decay_time;
+  t->attack_decay_time_int = t->attack_time + t->decay_time;
 }
 void wtstone_set_tone(wtstone_t *t, float *wave, float tl, float at, float dt, float sl, float rt, int sampling_rate){
   memcpy(t->wave, wave, sizeof(float)*WTSTONE_WAVE_SIZE);
@@ -134,8 +155,11 @@ void wtstone_set_tone(wtstone_t *t, float *wave, float tl, float at, float dt, f
   t->decay_time = sampling_rate * dt;
   t->sustain_level = sl;
   t->release_time = sampling_rate * rt;
-  t->attack_decay_time = t->attack_time + t->decay_time;
+  t->attack_decay_time_int = t->attack_time_int + t->decay_time_int;
 }
+
+
+/* need to fix following 3 functions */
 
 /*---------------------------------------------------
  *---------------------------------------------------*/
@@ -147,11 +171,11 @@ int wtstone_save(wtstone_t *t, char *filename){
     fprintf(fp, "%f ", t->wave[i]);
   }
   fprintf(fp, "%d %f %d %f %d\n",
-	  t->attack_time,
+	  t->attack_time_int,
 	  t->total_level,
-	  t->decay_time,
+	  t->decay_time_int,
 	  t->sustain_level,
-	  t->release_time);
+	  t->release_time_int);
   fclose(fp);
   return 0;
 }
@@ -166,11 +190,11 @@ int wtstone_load(wtstone_t *t, char *filename){
     fscanf(fp, "%f ", &t->wave[i]);
   }
   fscanf(fp, "%d %f %d %f %d\n",
-	  &t->attack_time,
+	  &t->attack_time_int,
 	  &t->total_level,
-	  &t->decay_time,
+	  &t->decay_time_int,
 	  &t->sustain_level,
-	 &t->release_time);
+	 &t->release_time_int);
   fclose(fp);
   return 0;
 }
@@ -185,13 +209,12 @@ void wtstone_dump(wtstone_t *t){
     if(i % 8 == 7) printf("\n");
   }
   printf("AT %3d AL %1.2f DT %3d SL %1.2f RT %3d\n",
-	  t->attack_time,
+	  t->attack_time_int,
 	  t->total_level,
-	  t->decay_time,
+	  t->decay_time_int,
 	  t->sustain_level,
-	 t->release_time);
+	 t->release_time_int);
 }
-
 
 
 /*---------------------------------------------------
@@ -245,7 +268,7 @@ static wtsvoice_t *find_key_voice(wtssynth_t *w, int key){
  * initializes voice structure
  *---------------------------------------------------*/
 static void wtsvoice_init(wtsvoice_t *v){
-  memset(v, 0, sizeof(v));
+  memset(v, 0, sizeof(wtsvoice_t));
 }
 
 /*---------------------------------------------------
@@ -260,24 +283,21 @@ static float wtsvoice_adsr(wtsvoice_t *v, wtstone_t *t){
     return 0.0;
 
   case WTSVOICE_KEYON:
-    if(v->elapsed < t->attack_time){
-      return t->total_level * (float)v->elapsed / (float)t->attack_time;
-    }else if(v->elapsed < t->attack_decay_time){
-      return t->total_level * (
-t->sustain_level * (float)(v->elapsed - t->attack_time) + 
-1.0 * (float)(t->attack_decay_time - v->elapsed)
-) / (float)t->decay_time;
+    if(v->elapsed < t->attack_time_int){
+      return t->total_level * (float)v->elapsed / (float)t->attack_time_int;
+    }else if(v->elapsed < t->attack_decay_time_int){
+      return t->total_level * (t->sustain_level * (float)(v->elapsed - t->attack_time_int) + 1.0 * (float)(t->attack_decay_time_int - v->elapsed)) / (float)t->decay_time_int;
     }else{
       return t->total_level * t->sustain_level;
     }
 
   case WTSVOICE_KEYOFF:
-    if(v->elapsed - v->keyoff_time >= t->release_time){
+    if(v->elapsed - v->keyoff_time >= t->release_time_int){
       v->status = WTSVOICE_UNUSED; /* state change */
       return 0.0;
     }else{
       return t->total_level * v->keyoff_level * 
-(float)(t->release_time - (v->elapsed - v->keyoff_time)) / (float)t->release_time;
+(float)(t->release_time_int - (v->elapsed - v->keyoff_time)) / (float)t->release_time_int;
     }
 
   } /* end of switch */
@@ -363,6 +383,26 @@ void wtssynth_keyoff(wtssynth_t *w, int key){
   //  printf("keyoff %d %d %f\n", key, v->keyoff_time, v->keyoff_level);
 }
 
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+int wtssynth_get_current_key(wtssynth_t *w, int index){
+  if(index < 0 || index >= WTSSYNTH_VOICE_MAX){
+    return -1;
+  }
+  if(w->voice[index].status == WTSVOICE_UNUSED) return -1;
+  return w->voice[index].key;
+}
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+int wtssynth_is_key_offing(wtssynth_t *w, int index){
+  if(index < 0 || index >= WTSSYNTH_VOICE_MAX){
+    return 0;
+  }
+  return w->voice[index].status == WTSVOICE_KEYOFF;
+}
+
 /*---------------------------------------------------
  *---------------------------------------------------*/
 int wtssynth_num_key_playing(wtssynth_t *w){
@@ -407,15 +447,22 @@ void wtssynth_render(wtssynth_t *w, audiobuf_t *a, int start, int size){
 /*---------------------------------------------------
  *---------------------------------------------------*/
 void wtssynth_midi(wtssynth_t *w, midievent_t *e){
+  int key_temp;
+
+  key_temp = e->shortparam[0];
+  key_temp += w->midi_key;
+  if(key_temp < 0) key_temp = 0;
+  if(key_temp > 127) key_temp = 127;
+
   switch(e->type){
   case MIDIEVENT_TYPE_NOTEOFF:
-    wtssynth_keyoff(w, e->shortparam[0]);
+    wtssynth_keyoff(w, key_temp);
     break;
   case MIDIEVENT_TYPE_NOTEON:
     if(e->shortparam[1] == 0){
-      wtssynth_keyoff(w, e->shortparam[0]);
+      wtssynth_keyoff(w, key_temp);
     }else{
-      wtssynth_keyon(w, e->shortparam[0], (float)e->shortparam[1]/127.0);
+      wtssynth_keyon(w, key_temp, (float)e->shortparam[1]/127.0);
     }
     break;
   case MIDIEVENT_TYPE_KEYPRESSURE:
@@ -451,4 +498,21 @@ void wtssynth_midi(wtssynth_t *w, midievent_t *e){
   }
 }
 
+void wtssynth_midi_key(wtssynth_t *w, int midi_key){
+  wtssynth_all_note_off(w);
+  w->midi_key = midi_key;
+}
+
+int wtssynth_get_program(wtssynth_t *w){
+  return w->config->current_preset;
+}
+
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+void wtssynth_all_note_off(wtssynth_t *w){
+  int i;
+  for(i = 0 ; i < WTSSYNTH_VOICE_MAX; i ++){
+    w->voice[i].status = WTSVOICE_UNUSED;
+  }  
+}
 

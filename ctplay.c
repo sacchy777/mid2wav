@@ -1,7 +1,40 @@
 /*
-gcc -I. `sdl2-config --cflags` ctplay.c audiobuf.c midievent.c misc.c soundmodule.c wtssynth_def.c freq_table.c 
-midifile.c nrsynth.c sdelay.c wtssynth.c xor128.c `sdl2-config --libs`
-*/
+ * ctplay
+ *
+ * ctplay.c
+ *
+ *
+ * Copyright (c) 2013 sada.gussy (sada dot gussy at gmail dot com)
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+/*------------------------------------------------------------------
+ *  ctplay
+ *  a yet another midi player
+ *  
+ * to compile:
+ *  make -f Makefile.linux
+ * or
+ *  make -f Makefile.windows
+ *------------------------------------------------------------------*/
 
 #include "SDL_config.h"
 #if HAVE_SIGNAL_H
@@ -23,6 +56,9 @@ midifile.c nrsynth.c sdelay.c wtssynth.c xor128.c `sdl2-config --libs`
 #define APPNAME "ctplay ver. 0.1"
 
 
+/*------------------------------------------------------------------
+ * strip path from full path filename
+ *------------------------------------------------------------------*/
 char * get_filename(char *fullpath){
   int len = 0;
   char *p = NULL;
@@ -39,12 +75,9 @@ char * get_filename(char *fullpath){
   return p;
 }
 
-
-
-
-
-
-
+/*------------------------------------------------------------------
+ * mid2wav structure
+ *------------------------------------------------------------------*/
 typedef struct {
   int is_active;
   midifile_t *mf;
@@ -56,6 +89,9 @@ typedef struct {
 SDL_AudioSpec spec;
 
 
+/*------------------------------------------------------------------
+ * GUI stuffs
+ *------------------------------------------------------------------*/
 #ifdef USE_GUI
 #include "SDL_ttf.h"
 int muted[16];
@@ -89,6 +125,9 @@ int frameskipcounter = 0;
 SDL_Color textcolor = {192,0,0,0xff};
 SDL_Color textcolor_dark = {48,0,0,0xff};
 
+/*------------------------------------------------------------------
+ * trivial function for rendering text
+ *------------------------------------------------------------------*/
 void sdltext_render(sdltext_t *s, SDL_Renderer *r, TTF_Font *font, char *string, SDL_Color c){
   SDL_Surface *tmp;
   tmp = TTF_RenderText_Solid(font, string, c);
@@ -106,6 +145,9 @@ TTF_Font *font2;
 
 #endif
 
+/*------------------------------------------------------------------
+ * mid2wav main body
+ *------------------------------------------------------------------*/
 mid2wav_t m;
 static int loaded = 0;
 static int no_reverb = 0;
@@ -115,7 +157,9 @@ static int loop_enable = 1;
 
 
 
-
+/*------------------------------------------------------------------
+ * is inside?
+ *------------------------------------------------------------------*/
 static int is_inside(SDL_Rect *r, int x, int y){
   return x >= r->x && x < r->x + r->w && y >= r->y && y < r->y + r->h;
 }
@@ -132,6 +176,9 @@ void poked(int sig){
   done = 1;
 }
 
+/*------------------------------------------------------------------
+ * audio fill callback
+ *------------------------------------------------------------------*/
 void SDLCALL fill(void *unused, Uint8 *stream, int len){
   int i;
   int j = 0;
@@ -168,6 +215,10 @@ void SDLCALL fill(void *unused, Uint8 *stream, int len){
 }
 
 
+
+/*------------------------------------------------------------------
+ * loading keyboard bitmap
+ *------------------------------------------------------------------*/
 #ifdef USE_GUI
 void load_bitmap(SDL_Renderer *r){
   SDL_Surface *temp;
@@ -200,11 +251,9 @@ SDL_Rect poses[12] = {
 };
 
 
-
-
-
-
-
+/*------------------------------------------------------------------
+ * periodical draw function
+ *------------------------------------------------------------------*/
 
 void draw(SDL_Renderer *r){
   int i;
@@ -286,9 +335,8 @@ void draw(SDL_Renderer *r){
 #endif
 
 /*------------------------------------------------------------------
- *
+ * delete memoreis
  *------------------------------------------------------------------*/
-
 void delete(){
   sdelay_destroy(m.d);
   soundmodule_destroy(m.s);
@@ -297,6 +345,9 @@ void delete(){
   memset(&m, 0, sizeof(m));
 }
 
+/*------------------------------------------------------------------
+ * alloc memoreis
+ *------------------------------------------------------------------*/
 void init(char *filename){
   m.mf = midifile_create(100000);
   midifile_set_verbose(m.mf, 0);
@@ -331,9 +382,7 @@ void init(char *filename){
 
 /*------------------------------------------------------------------
  *
- *
  *------------------------------------------------------------------*/
-
 void print_help(){
     printf(
 	   "Usage: ctplay [options] [filename]\n"
@@ -347,6 +396,9 @@ void print_help(){
 	   );
 }
 
+/*------------------------------------------------------------------
+ * main func
+ *------------------------------------------------------------------*/
 int main(int argc, char *argv[]){
   char *filename = NULL;
   char *files;
@@ -374,6 +426,11 @@ int main(int argc, char *argv[]){
   signal(SIGTERM, poked);
 #endif
 
+  /*
+   *
+   * parse args
+   *
+   */
 
   for(i = 1; i < argc; i ++){
 
@@ -425,6 +482,11 @@ int main(int argc, char *argv[]){
 
 
 
+  /*
+   *
+   * SDL initialize
+   *
+   */
 
 #ifdef USE_GUI
   memset(muted, 0, sizeof(muted));
@@ -511,6 +573,12 @@ int main(int argc, char *argv[]){
 
 
   SDL_PauseAudioDevice(dev, 0);
+
+  /*
+   *
+   * Main loop
+   *
+   */
 
 #ifdef USE_GUI
   while(!done){

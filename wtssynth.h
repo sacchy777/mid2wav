@@ -79,12 +79,15 @@ extern "C" {
 
 typedef struct {
   float wave[WTSTONE_WAVE_SIZE]; /* wave table, -1 to 1*/
-  unsigned int attack_time; /* ADSR envelopes */
+  float attack_time; /* ADSR envelopes */
   float total_level;
-  unsigned int decay_time;
+  float decay_time;
   float sustain_level;
-  unsigned int release_time;
-  unsigned int attack_decay_time; /* This is pre calculated value for optimization by given values aboves. */
+  float release_time;
+  unsigned int attack_time_int;
+  unsigned int decay_time_int;
+  unsigned int release_time_int;
+  unsigned int attack_decay_time_int; /* This is pre calculated value for optimization by given values aboves. */
 } wtstone_t;
 
 
@@ -144,6 +147,7 @@ typedef struct {
   wtsconfig_t *config; /* struct having configs */
   wtsvoice_t voice[WTSSYNTH_VOICE_MAX]; /* how many voices can be played simultaneously */
   int voiceover; /* 1 if it tries to play more than max voices */
+  int midi_key; /* for key change */
 } wtssynth_t;
 
 wtssynth_t *wtssynth_create();
@@ -185,6 +189,18 @@ void wtssynth_render(wtssynth_t *w, audiobuf_t *a, int start, int size);
  * control this synth via midi event
  *---------------------------------------------------*/
 void wtssynth_midi(wtssynth_t *w, midievent_t *e);
+
+
+
+void wtssynth_midi_key(wtssynth_t *w, int midi_key);
+
+int wtssynth_get_current_key(wtssynth_t *w, int index);
+int wtssynth_is_key_offing(wtssynth_t *w, int index);
+
+
+int wtssynth_get_program(wtssynth_t *w);
+void wtssynth_all_note_off(wtssynth_t *w);
+
 
 #ifdef __cplusplus
 }

@@ -132,6 +132,7 @@ void nrsynth_play(nrsynth_t *n, int key, float velocity){
   int inst_index = n->keymap[key];
     if(inst_index != -1){ /* do nothing if instrument is not assigned */
     nrsynth_inst_t *ni = &n->inst[inst_index];
+    ni->key = key;
     ni->status = NRSYNTH_INST_PLAYING;
     ni->elapsed = 0;
     ni->velocity = velocity;
@@ -266,3 +267,14 @@ void nrsynth_midi(nrsynth_t *n, midievent_t *e){
   }
 
 }
+/*---------------------------------------------------
+ *---------------------------------------------------*/
+int nrsynth_get_current_key(nrsynth_t *n, int index){
+  if(index < 0 || index >= NRSYNTH_INST_MAX){
+    return -1;
+  }
+  nrsynth_inst_t *ni = &n->inst[index];
+  if(ni->status == NRSYNTH_INST_UNUSED) return -1;
+  return ni->key;
+}
+
