@@ -51,11 +51,14 @@
 #include "audiobuf.h"
 #include "soundmodule.h"
 #include "sdelay.h"
+#include "dirfind.h"
+#include <sys/stat.h>
+
+#define APPNAME "ctplay ver. 0.2"
 
 
-#define APPNAME "ctplay ver. 0.1"
 
-
+SDL_mutex *lock;
 /*------------------------------------------------------------------
  * strip path from full path filename
  *------------------------------------------------------------------*/
@@ -145,6 +148,9 @@ TTF_Font *font2;
 
 #endif
 
+
+
+
 /*------------------------------------------------------------------
  * mid2wav main body
  *------------------------------------------------------------------*/
@@ -156,6 +162,8 @@ static int midi_key = 0;
 static int loop_enable = 1;
 
 
+dirfind_t *df = NULL;
+char current_filename[1024];
 
 /*------------------------------------------------------------------
  * is inside?
@@ -176,6 +184,34 @@ void poked(int sig){
   done = 1;
 }
 
+
+
+void delete();
+void init(char *filename);
+
+void fileopen(char *files){
+  /*
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "", files, window );
+  */
+  SDL_LockMutex(lock);
+  loaded = 0;
+  memset(muted, 0, sizeof(int[16]));
+  if(m.is_active) delete();
+  init(files);
+  strcpy(current_filename, get_filename(files));
+  SDL_UnlockMutex(lock);
+}
+void diropen(char *dir){
+  char *file;
+  char *exts[] = {".mid", ".MID"};
+  if(df != NULL) dirfind_destroy(df);
+  df = dirfind_create(dir, exts, 2);
+  if(df == NULL) return;
+  file = dirfind_get(df);
+  fileopen(file);
+}
+
+
 /*------------------------------------------------------------------
  * audio fill callback
  *------------------------------------------------------------------*/
@@ -183,7 +219,8 @@ void SDLCALL fill(void *unused, Uint8 *stream, int len){
   int i;
   int j = 0;
   int d;
-  if(loaded == 0){
+
+  if(loaded == 0 || SDL_LockMutex(lock) != 0){
     memset(stream, 0, len);
     return;
   }
@@ -203,6 +240,10 @@ void SDLCALL fill(void *unused, Uint8 *stream, int len){
     stream[j++] = (d & 0xff00) >> 8;
   }
   if(midifile_has_events(m.mf) == 0){
+    if(df != NULL){
+      char *file = dirfind_get(df);
+      fileopen(file);
+    }else
     if(loop_enable){
       midifile_rewind(m.mf);
     }else{
@@ -210,6 +251,7 @@ void SDLCALL fill(void *unused, Uint8 *stream, int len){
       ; // do nothing
     }
   }
+  SDL_UnlockMutex(lock);
   //  fprintf(stderr, "%d%%", midifile_progress(m.mf));
   //  fflush(stderr);
 }
@@ -271,6 +313,7 @@ void draw(SDL_Renderer *r){
   pos.x = KEYBOARD_X;
 
 
+  sdltext_render(&currentfile, r, font2, current_filename, textcolor);
   SDL_SetRenderDrawColor(r, 64, 0, 0, 0xff);
   SDL_RenderClear(r);
   for(i = 0; i < 16; i ++){
@@ -300,7 +343,9 @@ void draw(SDL_Renderer *r){
   if(m.is_active){
     for(i = 0; i < 16; i ++){
       if(i != 9){
+	SDL_LockMutex(lock);
 	j = soundmodule_get_program(m.s, i);
+	SDL_UnlockMutex(lock);
 	sdltext_render(&texts[i+1], r, font2, instnames[j/8], muted[i] == 0 ? textcolor : textcolor_dark);
       }else{
 	sdltext_render(&texts[i+1], r, font2, instnames[16], muted[i] == 0 ? textcolor : textcolor_dark);
@@ -342,7 +387,7 @@ void delete(){
   soundmodule_destroy(m.s);
   audiobuf_destroy(m.a);
   midifile_destroy(m.mf, 1);
-  memset(&m, 0, sizeof(m));
+  memset(&m, 0, sizeof(mid2wav_t));
 }
 
 /*------------------------------------------------------------------
@@ -413,8 +458,11 @@ int main(int argc, char *argv[]){
   
 
   SDL_AudioDeviceID dev;
+  current_filename[0] = 0;
 
+  lock = SDL_CreateMutex();
 
+  
 #if HAVE_SIGNAL_H
 #ifdef SIGHUP
   signal(SIGHUP, poked);
@@ -587,24 +635,19 @@ int main(int argc, char *argv[]){
 	done = 1;
       }
       if(event.type == SDL_DROPFILE){
+	struct stat statbuf;
 	files = event.drop.file;
-	/*
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, 
-				 "",
-				 files,
-				 window
-				 );
-	SDL_free(files);
-	*/
-	{
-	  char *tmp;
-	  loaded = 0;
-	  memset(muted, 0, sizeof(muted));
-	  if(m.is_active) delete();
-	  init(files);
-	  tmp = get_filename(files);
-	  sdltext_render(&currentfile, renderer, font2, tmp, textcolor);
+	stat(files, &statbuf);
+	if(S_ISDIR(statbuf.st_mode)){
+	  diropen(files);
+	}else{
+	  if(df != NULL){
+	    dirfind_destroy(df);
+	    df = NULL;
+	  }
+	  fileopen(files);
 	}
+	SDL_free(files);
       }
       if(event.type == SDL_MOUSEBUTTONUP){
 	fflush(stdout);
@@ -694,5 +737,8 @@ int main(int argc, char *argv[]){
   SDL_Quit();
   if(m.is_active)
     delete();
+
+  SDL_DestroyMutex(lock);
+  if(df != NULL) dirfind_destroy(df);
   return EXIT_SUCCESS;
 }

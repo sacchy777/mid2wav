@@ -447,7 +447,7 @@ void wtssynth_render(wtssynth_t *w, audiobuf_t *a, int start, int size){
 /*---------------------------------------------------
  *---------------------------------------------------*/
 void wtssynth_midi(wtssynth_t *w, midievent_t *e){
-  int key_temp;
+  int key_temp = 0;
 
   key_temp = e->shortparam[0];
   key_temp += w->midi_key;

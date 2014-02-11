@@ -1,7 +1,7 @@
 
 
-         ctplay ver. 0.1
-                           2013/11/2
+         ctplay ver. 0.2
+                           2013/11/10
 
 -----------
 What's this
@@ -57,6 +57,18 @@ Track 10 is dedicated for the rhythm.
 maximum 124 voices
   120 wavetable synth, 8 voices for each track
   4 for rhythm
+
+
+---------------
+Version History
+---------------
+2013/11/10 ver 0.2
+  - Added a function that you can drop a directory
+    which has midi files into the app to play.
+  - Fixed some thread related issues.
+
+2013/11/2 ver 0.1
+  - Initial release
 
 
 -----------
