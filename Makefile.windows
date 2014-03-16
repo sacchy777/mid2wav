@@ -5,8 +5,9 @@
 #
 
 PROGRAM = ctplay
-OBJS	= ctplay.o soundmodule.o midifile.o midievent.o freq_table.o wtssynth_def.o wtssynth.o nrsynth.o xor128.o audiobuf.o misc.o sdelay.o
+OBJS	= ctplay.o soundmodule.o midifile.o midievent.o freq_table.o wtssynth_def.o wtssynth.o nrsynth.o xor128.o audiobuf.o misc.o sdelay.o dirfind.o
 CC	= gcc
+RUBY	= ruby
 
 CFLAGS	= -DUSE_GUI -g -Wall -O2 -DWINDOWS `sdl2-config --cflags`
 LIBS	= `sdl2-config --libs` -lSDL2_ttf
@@ -19,6 +20,14 @@ all:	$(PROGRAM)
 
 $(PROGRAM)	:$(OBJS)
 	$(CC) $(CFLAGS) -o $(PROGRAM) $^ $(LIBS)
+freq_table.c:	freq_table.rb
+	$(RUBY) $<
+
+wtssynth_def.c:	wtssynth_def.rb
+	$(RUBY) $<
+
+freq_table.h:	freq_table.rb
+	$(RUBY) $<
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
@@ -27,5 +36,5 @@ $(PROGRAM)	:$(OBJS)
 clean:
 	$(RM) $(PROGRAM) $(OBJS)
 
-#test_cave.o:cave.h
+
 
