@@ -10,5 +10,4 @@
 *.stackdump
 *.a
 *.o
-*.dll
 visualstudio
