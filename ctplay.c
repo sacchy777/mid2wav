@@ -436,6 +436,7 @@ void print_help(){
 	   "  -k [key]               transpose by key in halftone\n"
 	   "  -n                     disable a reverb effect\n"
 	   "  -s [channel]           solo play with the specified channel(1..16)\n"
+	   "  --no-repeat            start without repeat\n"
 	   "\n"
 	   "ctplay version 0.0\n"
 	   );
@@ -484,6 +485,11 @@ int main(int argc, char *argv[]){
 
     if(strcmp("-n", argv[i]) == 0){
       no_reverb = 1;
+      continue;
+    }
+
+    if(strcmp("--no-repeat", argv[i]) == 0){
+      loop_enable = 0;
       continue;
     }
 
