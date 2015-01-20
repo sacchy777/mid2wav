@@ -54,7 +54,7 @@
 #include "dirfind.h"
 #include <sys/stat.h>
 
-#define APPNAME "ctplay ver. 0.2"
+#define APPNAME "ctplay ver. 0.3"
 
 
 
@@ -147,13 +147,9 @@ TTF_Font *font1;
 TTF_Font *font2;
 
 #endif
-
-
-
-
-/*------------------------------------------------------------------
- * mid2wav main body
- *------------------------------------------------------------------*/
+/*
+main body
+*------------------------------------------------------------------*/
 mid2wav_t m;
 static int loaded = 0;
 static int no_reverb = 0;
@@ -730,6 +726,7 @@ int main(int argc, char *argv[]){
       }
     }
     draw(renderer);
+SDL_Delay(1);
   }
 #else
   while(!done){

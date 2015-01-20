@@ -1,7 +1,7 @@
 
 
-         ctplay ver. 0.2
-                           2013/11/10
+         ctplay ver. 0.3
+                           2015/1/20
 
 -----------
 What's this
@@ -36,15 +36,15 @@ Drop a midi file into the ctplay window.
 --------------
 User Interface
 --------------
-Te name of intruments is clickable.
+The intruments name is clickable.
   Left click : make the track mute or not.
   Right Clock  : make the track solo or not.
 
-This repeates playing music at default.
-You can toggle the repeat status by 
+Music repeats at default.
+You can toggle it by
 clicking "repeat".
 
-Transpose can be performed by clicking
+Transpose can be done by clicking
 < or > besides "Key".
 
 
@@ -62,6 +62,11 @@ maximum 124 voices
 ---------------
 Version History
 ---------------
+
+2015/1/20
+  - Added SDL_Delay to reduce cpu usage.
+
+
 2013/11/10 ver 0.2
   - Added a function that you can drop a directory
     which has midi files into the app to play.
@@ -74,7 +79,6 @@ Version History
 -----------
 Source code
 -----------
-Comming soon.. at
 https://github.com/sadagussy/mid2wav
 
 
