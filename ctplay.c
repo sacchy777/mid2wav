@@ -54,7 +54,7 @@
 #include "dirfind.h"
 #include <sys/stat.h>
 
-#define APPNAME "ctplay ver. 0.3"
+#define APPNAME "ctplay ver. 0.4"
 
 
 
@@ -434,7 +434,7 @@ void print_help(){
 	   "  -s [channel]           solo play with the specified channel(1..16)\n"
 	   "  --no-repeat            start without repeat\n"
 	   "\n"
-	   "ctplay version 0.0\n"
+	   APPNAME
 	   );
 }
 
