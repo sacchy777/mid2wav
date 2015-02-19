@@ -448,8 +448,8 @@ void wtssynth_render(wtssynth_t *w, audiobuf_t *a, int start, int size){
       audiobuf_add_L(a, l);
       audiobuf_add_R(a, r);
 
-      //      wtsvoice_next(v, pitchbend_delta);
-      wtsvoice_next(v, 1.0);
+      wtsvoice_next(v, pitchbend_delta);
+      //      wtsvoice_next(v, 1.0);
 
     }    
   }
