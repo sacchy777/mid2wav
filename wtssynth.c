@@ -473,7 +473,7 @@ void wtssynth_midi(wtssynth_t *w, midievent_t *e){
     if(e->shortparam[1] == 0){
       wtssynth_keyoff(w, key_temp);
     }else{
-      wtssynth_keyon(w, key_temp, (float)e->shortparam[1]/127.0);
+      wtssynth_keyon(w, key_temp, (float)e->shortparam[1]*(float)e->shortparam[1]/(127.0*127.0));
     }
     break;
   case MIDIEVENT_TYPE_KEYPRESSURE:

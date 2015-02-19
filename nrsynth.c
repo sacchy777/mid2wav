@@ -233,7 +233,7 @@ void nrsynth_midi(nrsynth_t *n, midievent_t *e){
     break;
   case MIDIEVENT_TYPE_NOTEON:
     if(e->shortparam[1] != 0){
-      nrsynth_play(n, e->shortparam[0], (float)e->shortparam[1]/127.0);
+      nrsynth_play(n, e->shortparam[0], (float)e->shortparam[1]*(float)e->shortparam[1]/(127.0*127.0));
     }
     break;
   case MIDIEVENT_TYPE_KEYPRESSURE:

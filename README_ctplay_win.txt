@@ -62,8 +62,12 @@ maximum 124 voices
 ---------------
 Version History
 ---------------
+2015/2/19 ver 0.5
+  - Pitchbend support(Bendrange=2 for now)
+  - Velocity curve changed to power of 2 from linear.
+  - Decreased loudness of high tones
 
-2015/1/20
+2015/1/20 ver 0.4
   - Added SDL_Delay to reduce cpu usage.
 
 

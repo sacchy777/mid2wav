@@ -75,7 +75,7 @@ extern "C" {
 #define WTSCONFIG_MODULATION_DEFAULT 0.0
 #define WTSCONFIG_PITCHBEND_DEFAULT 0.0
 
-#define WTSCONFIG_VOLUME_SCALING 0.75 /* This number is used to reduce whole output intensity */
+#define WTSCONFIG_VOLUME_SCALING 1.00 /* This number is used to reduce whole output intensity */
 
 typedef struct {
   float wave[WTSTONE_WAVE_SIZE]; /* wave table, -1 to 1*/
