@@ -54,7 +54,7 @@
 #include "dirfind.h"
 #include <sys/stat.h>
 
-#define APPNAME "ctplay ver. 0.4"
+#define APPNAME "ctplay ver. 0.5"
 
 
 

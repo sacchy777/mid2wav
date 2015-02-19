@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 extern const wtstone_t wtstone_wave_presets[WTSTONE_NUM_PRESETS];
 
@@ -113,6 +114,7 @@ void wtsconfig_init(wtsconfig_t *c){
   c->expression = WTSCONFIG_EXPRESSION_DEFAULT;
   c->modulation = WTSCONFIG_MODULATION_DEFAULT;
   c->pitchbend = WTSCONFIG_PITCHBEND_DEFAULT;
+  c->pitchbend_delta = 1.0;
   wtsconfig_update_volume(c);
   wtsconfig_programchange(c, 0);
 }
@@ -322,8 +324,9 @@ static inline float wtsvoice_getwave(wtsvoice_t *v, wtstone_t *t){
  * internal function
  * proceeds voice's time pointer.
  *---------------------------------------------------*/
-static inline void wtsvoice_next(wtsvoice_t *v){
-  v->phase += v->delta;
+static inline void wtsvoice_next(wtsvoice_t *v, float pitchbend_delta){
+  //  v->phase += v->delta;
+  v->phase += (v->delta * pitchbend_delta);
   v->phase &= 0x1FFFFF;
   v->elapsed ++;
 }
@@ -365,6 +368,8 @@ void wtssynth_keyon(wtssynth_t *w, int key, float velocity){
   v->delta = 0x10000 * WTSTONE_WAVE_SIZE * freq_table[key] / w->config->sampling_rate;
   v->key = key;
   v->velocity = velocity;
+  v->amp = (256 - key)/512.0;
+
 }
 
 /*---------------------------------------------------
@@ -423,23 +428,29 @@ void wtssynth_render(wtssynth_t *w, audiobuf_t *a, int start, int size){
   float f;
   float l,r;
   float vl,vr;
+  float amp;
   wtsvoice_t *v;
   wtsconfig_t *c = w->config;
   wtstone_t *t = wtsconfig_gettone(c);
+  float pitchbend_delta = c->pitchbend_delta;
+
   vl = c->volume_total_l;
   vr = c->volume_total_r;
   for(i = 0; i < WTSSYNTH_VOICE_MAX; i ++){
     v = &w->voice[i];
+    amp = v->amp;
     if(v->status == WTSVOICE_UNUSED) continue;
     audiobuf_seek(a, start);
     for(j = 0; j < size; j ++){
       f = wtsvoice_getwave(v, t);
-      l = f * vl;
-      r = f * vr;
+      l = amp * f * vl;
+      r = amp * f * vr;
       audiobuf_add_L(a, l);
       audiobuf_add_R(a, r);
 
-      wtsvoice_next(v);
+      //      wtsvoice_next(v, pitchbend_delta);
+      wtsvoice_next(v, 1.0);
+
     }    
   }
 }
@@ -486,12 +497,14 @@ void wtssynth_midi(wtssynth_t *w, midievent_t *e){
     }
     break;
   case MIDIEVENT_TYPE_PROGRAMCHANGE:
-
     wtsconfig_programchange(w->config, e->shortparam[0]);
     break;
   case MIDIEVENT_TYPE_CHANNELPRESSURE:
     break;
   case MIDIEVENT_TYPE_PITCHBENDCHANGE:
+    //    w->config->pitchbend = BR * (((float)e->shortparam[1]/127.0 - 0.5) * 2.0) / 12.0;
+    w->config->pitchbend = 2 * (((float)e->shortparam[1]/127.0 - 0.5) * 2.0) / 12.0;
+    w->config->pitchbend_delta = pow(2.0, w->config->pitchbend);
     break;
   default:
     ;

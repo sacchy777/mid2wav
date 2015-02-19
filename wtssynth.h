@@ -75,7 +75,7 @@ extern "C" {
 #define WTSCONFIG_MODULATION_DEFAULT 0.0
 #define WTSCONFIG_PITCHBEND_DEFAULT 0.0
 
-#define WTSCONFIG_VOLUME_SCALING 0.45 /* This number is used to reduce whole output intensity */
+#define WTSCONFIG_VOLUME_SCALING 0.75 /* This number is used to reduce whole output intensity */
 
 typedef struct {
   float wave[WTSTONE_WAVE_SIZE]; /* wave table, -1 to 1*/
@@ -101,6 +101,7 @@ typedef struct {
   float expression; /* works as volume, default 1.0 */
   float modulation; /* not used for now. vibrato */
   float pitchbend; /* not used for now pitchbend */
+  float pitchbend_delta;
 
   float volume_total_l; /* for reducing calculation */
   float volume_total_r; /* for reducing calculation */
@@ -137,6 +138,7 @@ typedef struct {
   float pitchbend; /* not used for now */
   float velocity; /* intensity of the voice */
   int key; /* key number (A5=69) */
+  float amp;
 } wtsvoice_t;
 
 /*---------------------------------------------------
