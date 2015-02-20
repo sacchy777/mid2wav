@@ -139,6 +139,10 @@ typedef struct {
   float velocity; /* intensity of the voice */
   int key; /* key number (A5=69) */
   float amp;
+  // lpf
+  float lpf_inbuf[3];
+  float lpf_outbuf[3];
+
 } wtsvoice_t;
 
 /*---------------------------------------------------

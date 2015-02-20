@@ -53,8 +53,9 @@
 #include "sdelay.h"
 #include "dirfind.h"
 #include <sys/stat.h>
+#include <math.h>
 
-#define APPNAME "ctplay ver. 0.5"
+#define APPNAME "ctplay ver. 0.6"
 
 
 
@@ -156,7 +157,8 @@ static int no_reverb = 0;
 static int solo = -1;
 static int midi_key = 0;
 static int loop_enable = 1;
-
+static float reverb = 0;
+static float reverb_div = 1.0;
 
 dirfind_t *df = NULL;
 char current_filename[1024];
@@ -406,7 +408,8 @@ void init(char *filename){
     soundmodule_solo(m.s, solo - 1);
   }
   m.d = sdelay_create();
-  sdelay_set_drywet(m.d, 0.8, 0.3);
+  //  sdelay_set_drywet(m.d, 0.8, 0.3);
+  sdelay_set_drywet(m.d, (1.0 - reverb)/reverb_div, reverb/reverb_div);
   if(midifile_load(m.mf, filename, 44100) < 0){
     fprintf(stderr, "failed to load %s\n", filename);
     delete();
@@ -429,8 +432,8 @@ void print_help(){
 	   "Usage: ctplay [options] [filename]\n"
 	   "  A yet another chip tune midi player\n"
 	   "\n"
+	   "  -r [reverb]            add reverb 0..100\n"
 	   "  -k [key]               transpose by key in halftone\n"
-	   "  -n                     disable a reverb effect\n"
 	   "  -s [channel]           solo play with the specified channel(1..16)\n"
 	   "  --no-repeat            start without repeat\n"
 	   "\n"
@@ -478,12 +481,12 @@ int main(int argc, char *argv[]){
    */
 
   for(i = 1; i < argc; i ++){
-
+    /*
     if(strcmp("-n", argv[i]) == 0){
       no_reverb = 1;
       continue;
     }
-
+    */
     if(strcmp("--no-repeat", argv[i]) == 0){
       loop_enable = 0;
       continue;
@@ -505,6 +508,23 @@ int main(int argc, char *argv[]){
 	printf("unsuported parameter %s as option -s\n", argv[i]);
 	return EXIT_FAILURE;
       }
+      continue;
+    }
+
+    if(strcmp("-r", argv[i]) == 0){
+      int reverb_int;
+      if(i + 1 == argc){
+	printf("no parameter after option -r\n");
+	return EXIT_FAILURE;
+      }
+      i ++;
+      reverb_int = atoi(argv[i]);
+      if(reverb_int < 0 || reverb_int > 100){
+	printf("unsuported parameter %s as option -r\n", argv[i]);
+	return EXIT_FAILURE;
+      }
+      reverb = (float)reverb_int / 100.0;
+      reverb_div = sqrt(reverb * reverb + (1.0-reverb)*(1.0-reverb));
       continue;
     }
 

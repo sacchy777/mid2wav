@@ -314,10 +314,37 @@ static float wtsvoice_adsr(wtsvoice_t *v, wtstone_t *t){
  * wtsvoice_next() if next sample is needed
  *---------------------------------------------------*/
 static inline float wtsvoice_getwave(wtsvoice_t *v, wtstone_t *t){
+  const float coeff = 1.0/tan(3.141592 * 8500/44100);
+  const float rez = 1.2; // 1.4 .. 0.1(strong rez)
+  float out;
+  float in = t->wave[0x1f&(v->phase>>16)] *
+    wtsvoice_adsr(v, t) *
+    v->velocity;
+  float a = (1.0/(1.0+rez*coeff+coeff*coeff));
+
+  v->lpf_outbuf[2] = v->lpf_outbuf[1];
+  v->lpf_outbuf[1] = v->lpf_outbuf[0];
+  v->lpf_inbuf[2] = v->lpf_inbuf[1];
+  v->lpf_inbuf[1] = v->lpf_inbuf[0];
+  v->lpf_inbuf[0] = in;
+  
+  out = 
+    a * in +
+    a * 2 * v->lpf_inbuf[1] +
+    a * v->lpf_inbuf[2] -
+    2.0 * (1.0 - coeff*coeff) * a * v->lpf_outbuf[1] -
+    (1.0 - rez * coeff + coeff*coeff) * a * v->lpf_outbuf[2];
+
+  v->lpf_outbuf[0] = out;
+
+  return out;
+
+  /*  
   return 
     t->wave[0x1f&(v->phase>>16)] *
     wtsvoice_adsr(v, t) *
     v->velocity;
+  */
 }
 
 /*---------------------------------------------------

@@ -62,6 +62,12 @@ maximum 124 voices
 ---------------
 Version History
 ---------------
+2015/2/20 ver 0.6
+  - option n deleted.
+  - option r added to choose reverb value 0 .. 100.
+  - LPF added wtssynth to cut over 8500Hz
+  - some loudness adjusted
+
 2015/2/19 ver 0.5
   - Pitchbend support(Bendrange=2 for now)
   - Velocity curve changed to power of 2 from linear.
