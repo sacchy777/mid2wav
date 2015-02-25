@@ -62,6 +62,10 @@ maximum 124 voices
 ---------------
 Version History
 ---------------
+2015/2/20 ver 0.7
+  - total volume adjusted.
+  - reverb disabled at default.
+
 2015/2/20 ver 0.6
   - option n deleted.
   - option r added to choose reverb value 0 .. 100.

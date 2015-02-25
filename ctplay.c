@@ -55,7 +55,7 @@
 #include <sys/stat.h>
 #include <math.h>
 
-#define APPNAME "ctplay ver. 0.6"
+#define APPNAME "ctplay ver. 0.7"
 
 
 
@@ -158,7 +158,8 @@ static int solo = -1;
 static int midi_key = 0;
 static int loop_enable = 1;
 static float reverb = 0;
-static float reverb_div = 1.0;
+static float reverb_div = 1;//sqrt(0.3 * 0.3 + (1.0 - 0.3) * (1.0 - 0.3));
+
 
 dirfind_t *df = NULL;
 char current_filename[1024];

@@ -16,7 +16,8 @@ PROGRAM_TEST_DLL_OBJS	= mid2wavdll_test.o
 
 CC	= gcc
 RUBY	= ruby
-CFLAGS	= -g -Wall -O2
+#CFLAGS	= -g -Wall -O2 -DWINDOWS
+CFLAGS	= -g -Wall -DWINDOWS
 
 .SUFFIXIES:	.c .o
 

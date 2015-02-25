@@ -98,12 +98,12 @@ int fwrite2Bleu(FILE *fp, unsigned short value){
 
 /* ----------------------------------------------------------------------
  * ----------------------------------------------------------------------*/
-int fwrite2Bles(FILE *fp, short value){
+int fwrite2Bles(FILE *fp, int value){
   int error = 0;
   unsigned char v[2];
   int i;
   v[0] = value & 0xff;
-  v[1] = (value>>8) & 0xff;
+  v[1] = (value & 0xff00) >> 8;
   for(i = 0; i < 2; i ++){
     error = fwrite(&v[i], 1, 1, fp);
     if(error < 1){

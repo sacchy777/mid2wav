@@ -115,14 +115,15 @@ int main(int argc, char *argv[]){
     return EXIT_FAILURE;
   }
   
+  soundmodule_midi_key(m.s, 0);
   //  midifile_dump(mf);
   audiobuf_save_header(m.a, outfilename);
   while(midifile_has_events(m.mf)){
     audiobuf_clear(m.a);
+    audiobuf_rewind(m.a);
     soundmodule_render(m.s, m.a, m.mf);
     
     if(!no_reverb){
-      audiobuf_rewind(m.a);
       sdelay_render(m.d, m.a, 0, 44100*10);
     }
 
