@@ -79,8 +79,8 @@ static const int nrsynth_keymap_default[128] = {
  * need to call this if below param changes
  *---------------------------------------------------*/
 static void nrsynth_update_volume(nrsynth_t *n){
-  n->volume_total_l = n->expression * n->volume * n->panpot * NRSYNTH_VOLUME_SCALING;
-  n->volume_total_r = n->expression * n->volume * (1.0 - n->panpot) * NRSYNTH_VOLUME_SCALING;
+  n->volume_total_l = n->expression * n->volume * (1.0 - n->panpot) * NRSYNTH_VOLUME_SCALING;
+  n->volume_total_r = n->expression * n->volume * (      n->panpot) * NRSYNTH_VOLUME_SCALING;
 }
 
 

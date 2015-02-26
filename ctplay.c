@@ -55,7 +55,7 @@
 #include <sys/stat.h>
 #include <math.h>
 
-#define APPNAME "ctplay ver. 0.7"
+#define APPNAME "ctplay ver. 0.8"
 
 
 

@@ -1,7 +1,7 @@
 
 
-         ctplay ver. 0.3
-                           2015/1/20
+         ctplay ver. 0.8
+                           2015/2/27
 
 -----------
 What's this
@@ -62,7 +62,11 @@ maximum 124 voices
 ---------------
 Version History
 ---------------
-2015/2/20 ver 0.7
+2015/2/27 ver 0.8
+  - total volume adjusted.
+  - fixed panpot position
+
+2015/2/25 ver 0.7
   - total volume adjusted.
   - reverb disabled at default.
 

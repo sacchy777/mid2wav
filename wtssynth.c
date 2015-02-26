@@ -100,8 +100,8 @@ void wtsconfig_programchange(wtsconfig_t *c, int preset){
  * need to call this if below param changes
  *---------------------------------------------------*/
 static void wtsconfig_update_volume(wtsconfig_t *c){
-  c->volume_total_l = c->volume * c->expression * c->panpot * WTSCONFIG_VOLUME_SCALING;
-  c->volume_total_r = c->volume * c->expression * (1.0 - c->panpot) * WTSCONFIG_VOLUME_SCALING;
+  c->volume_total_l = c->volume * c->expression * (1.0 - c->panpot) * WTSCONFIG_VOLUME_SCALING;
+  c->volume_total_r = c->volume * c->expression * (      c->panpot) * WTSCONFIG_VOLUME_SCALING;
 }
 
 /*---------------------------------------------------
